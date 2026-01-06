@@ -59,6 +59,7 @@ client.on('guildMemberAdd', async (member) => {
 });
 
 PatreonEmitter.on('refreshed', async () => {
+  console.log(`\n=============================`);
   console.log('Patreon cache refreshed event received.');
   // Iterate through all supporters and check if they are in the server.
   for (const member of CachedPatreonMembers) {
@@ -81,6 +82,8 @@ PatreonEmitter.on('refreshed', async () => {
       );
     }
   }
+  console.log('Finished processing Patreon cache refresh.');
+  console.log(`=============================\n`);
 });
 
 async function checkAndAssignRoles(member: Member): Promise<void> {
