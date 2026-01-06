@@ -1,6 +1,5 @@
 import { config } from 'dotenv';
 import { Client, Constants, Member } from 'oceanic.js';
-import OceanicInteractions from 'oceanic.js-interactions';
 
 import {
   startCacheRefresh,
@@ -36,8 +35,6 @@ const client = new Client({
     },
   },
 });
-
-const handler = new OceanicInteractions.CommandHandler(client);
 
 // Leave a server if it is not the target server.
 client.on('guildCreate', async (guild) => {
