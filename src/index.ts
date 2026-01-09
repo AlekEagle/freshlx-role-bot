@@ -73,7 +73,10 @@ PatreonEmitter.on('refreshed', async () => {
         client.guilds.get(SERVER_ID)?.members.get(member.discord_id) ??
         (await client.rest.guilds.getMember(SERVER_ID, member.discord_id));
     } catch (error) {
-      console.error(error);
+      // If the error is not "Unknown Member", log it.
+      if (error.code !== 10007) {
+        console.error(error);
+      }
     }
     if (guildMember) {
       console.log(
