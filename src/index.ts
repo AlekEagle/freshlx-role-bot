@@ -82,7 +82,7 @@ PatreonEmitter.on('refreshed', async () => {
       await checkAndAssignRoles(guildMember);
     } else {
       console.log(
-        `Supporter with Discord ID ${member.discord_id} is not in the server.`,
+        `Supporter ${member.full_name} with Discord ID ${member.discord_id} is not in the server.`,
       );
     }
   }
