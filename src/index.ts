@@ -67,10 +67,14 @@ PatreonEmitter.on('refreshed', async () => {
       console.log(`Supporter ${member.full_name} has no linked Discord ID.`);
       continue;
     }
-    const guildMember = await client.rest.guilds.getMember(
-      SERVER_ID,
-      member.discord_id,
-    );
+    let guildMember: Member | null = null;
+    try {
+      guildMember =
+        client.guilds.get(SERVER_ID)?.members.get(member.discord_id) ??
+        (await client.rest.guilds.getMember(SERVER_ID, member.discord_id));
+    } catch (error) {
+      console.error(error);
+    }
     if (guildMember) {
       console.log(
         `Checking roles for supporter ${guildMember.user.username} (${guildMember.id})`,
