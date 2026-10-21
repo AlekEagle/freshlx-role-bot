@@ -32,6 +32,7 @@ export async function getAllMembers(): Promise<void> {
     });
 
     if (!response.ok) {
+      console.error(await response.text());
       throw new Error(
         `Failed to fetch members from Patreon API: ${response.statusText}`,
       );
@@ -53,12 +54,12 @@ export async function getAllMembers(): Promise<void> {
         member.attributes.patron_status === 'active_patron'
           ? 'active'
           : member.attributes.patron_status === 'former_patron'
-          ? 'former'
-          : member.attributes.patron_status === 'declined_patron'
-          ? 'declined'
-          : member.attributes.patron_status === null
-          ? 'free'
-          : 'unknown';
+            ? 'former'
+            : member.attributes.patron_status === 'declined_patron'
+              ? 'declined'
+              : member.attributes.patron_status === null
+                ? 'free'
+                : 'unknown';
       if (patreonStatus === 'unknown') {
         throw new Error('Unknown Patreon status.');
       }
@@ -78,11 +79,14 @@ export async function getAllMembers(): Promise<void> {
     });
 
     // Check if there are more pages to fetch.
-    if (json.meta.pagination?.cursors?.next) {
-      await getMembersFromPage(
-        `${PATREON_API_URL}/campaigns/${process.env.PATREON_CAMPAIGN_ID}/members?include=currently_entitled_tiers,user&fields%5Bmember%5D=full_name,patron_status,currently_entitled_amount_cents,will_pay_amount_cents,lifetime_support_cents,pledge_relationship_start&fields%5Buser%5D=social_connections,full_name&sort=-pledge_relationship_start&page%5Bsize%5D=500&cursor=${json.meta.pagination.cursors.next}`,
-      );
+    if (json.links?.next) {
+      await getMembersFromPage(json.links.next);
     }
+    /* if (json.meta.pagination?.cursors?.next) {
+      await getMembersFromPage(
+        `${PATREON_API_URL}/campaigns/${process.env.PATREON_CAMPAIGN_ID}/members?include=currently_entitled_tiers,user&fields%5Bmember%5D=full_name,patron_status,currently_entitled_amount_cents,will_pay_amount_cents,lifetime_support_cents,pledge_relationship_start&fields%5Buser%5D=social_connections,full_name&sort=-pledge_relationship_start&page%5Bsize%5D=500&&page%5Bcursor%5D=${json.meta.pagination.cursors.next}`,
+      );
+    } */
   }
   // Clear the cache before fetching.
   cached = [];
@@ -131,14 +135,17 @@ export async function startCacheRefresh(): Promise<void> {
   if (cacheTimeout) {
     clearTimeout(cacheTimeout);
   }
-  cacheTimeout = setTimeout(async () => {
-    // Clear the cache before fetching.
-    cached = [];
-    // Set the timeout again.
-    startCacheRefresh().catch((error) => {
-      console.error('Failed to refresh Patreon cache:', error);
-    });
-  }, 30 * 60 * 1000);
+  cacheTimeout = setTimeout(
+    async () => {
+      // Clear the cache before fetching.
+      cached = [];
+      // Set the timeout again.
+      startCacheRefresh().catch((error) => {
+        console.error('Failed to refresh Patreon cache:', error);
+      });
+    },
+    30 * 60 * 1000,
+  );
 }
 
 export function stopCacheRefresh(): void {
